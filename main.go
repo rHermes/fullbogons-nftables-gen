@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -58,6 +60,10 @@ type Data struct {
 }
 
 func main() {
+	if len(os.Args) != 2 {
+		log.Fatalf("We require one argument, that being the filename")
+	}
+
 	// Load the template
 	tRoot := template.New("main")
 	tmpl, err := tRoot.Parse(strings.TrimLeftFunc(tmplText, unicode.IsSpace))
@@ -84,11 +90,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("fetch ipv4 list: %v", err)
 		}
-		if len(ips) > 3 {
-			data.IPv4s = ips[:4]
-		} else {
-			data.IPv4s = ips
-		}
+		data.IPv4s = ips
 	}()
 
 	// IPv6
@@ -99,18 +101,30 @@ func main() {
 		if err != nil {
 			log.Fatalf("fetch ipv6 list: %v", err)
 		}
-		// data.IPv6s = ips
-		if len(ips) > 3 {
-			data.IPv6s = ips[:4]
-		} else {
-			data.IPv6s = ips
-		}
+		data.IPv6s = ips
 	}()
 
 	wg.Wait()
 
-	if err := tmpl.Execute(os.Stdout, data); err != nil {
+	// We write to a buffer, to prevent half finished output or getting a file in
+	// an unusable state.
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
 		log.Fatalf("execute template: %v", err)
+	}
+
+	fd := os.Stdout
+	if os.Args[1] != "-" {
+		var err error
+		fd, err = os.OpenFile(os.Args[1], os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("opening output file: %v", err)
+		}
+		defer fd.Close()
+	}
+
+	if _, err := io.Copy(fd, &buf); err != nil {
+		log.Fatalf("writing to output: %v", err)
 	}
 }
 
