@@ -118,7 +118,7 @@ func writeDefFile(w io.Writer, d Data) error {
 
 // writeIpList writes
 func writeIpList(w io.Writer, name string, ips []net.IPNet) error {
-	if _, err := fmt.Fprintf(w, "%s = {", name); err != nil {
+	if _, err := fmt.Fprintf(w, "define %s = {", name); err != nil {
 		return err
 	}
 
