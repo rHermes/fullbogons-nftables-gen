@@ -7,5 +7,5 @@ Wants=nftables.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/fullbogons-nftables-gen /etc/nftables.d/fullbogons-defintion.nft
+ExecStart=/usr/local/bin/fullbogons-nftables-gen /etc/nftables.d/fullbogons-definition.nft
 ExecStart=/usr/sbin/nft -f /etc/nftables.d/refresh-fullbogons.nft
