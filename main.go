@@ -33,7 +33,10 @@ func main() {
 		log.Fatalf("We require one argument, that being the filename")
 	}
 
-	fd, err := renameio.NewPendingFile(os.Args[1], renameio.WithExistingPermissions())
+	fd, err := renameio.NewPendingFile(os.Args[1],
+		renameio.WithExistingPermissions(),
+		renameio.WithPermissions(0644),
+	)
 	if err != nil {
 		log.Fatalf("new pending file: %v", err)
 	}
