@@ -24,11 +24,23 @@ To make usage easier, I've included a `systemd.timer` file that will execute thi
 once every 4 hours roughly. This is how you can install it:
 
 ```
-TODO
+sudo install fullbogons-nftables-gen /usr/local/bin
+sudo install -m644 contrib/systemd/fullbogons-nftables-gen.* /etc/systemd/system
+sudo install -Dm644 contrib/nftables/example-refresh-set.nft /etc/nftables.d/refresh-fullbogons.nft
+
+# This will fail, and that is ok, it is just to get the inital definitions file.
+sudo systemctl start fullbogons-nftables-gen.service
+
+# Then update /etc/nftables.conf with something akin to the content of
+# contrib/nftables/example-ruleset.nft
+
+# Then enable the timer
+sudo systemctl enable --now fullbogons-nftables-gen.timer
 ```
 
-I've also included two example `nftables` files. The first `XXXX` is an example usage
-of the defintions file. The second `YYYY` is an example usage for hotswapping the
+I've also included two example `nftables` files. The first `contrib/nftables/example-ruleset.nft`
+is an example usage of the defintions file. The second 
+`contrib/nftables/example-refresh-set.nft` is an example usage for hotswapping the
 contents of the bogons sets, without reloading the whole ruleset.
 
 [fullbogons-ref]: https://team-cymru.com/community-services/bogon-reference/
